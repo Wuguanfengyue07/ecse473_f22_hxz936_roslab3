@@ -1,0 +1,37 @@
+<launch>
+    <arg name = "use_xacro" default = "false" />
+    
+    <arg name = "use_gui" default = "true" />
+  
+    <arg name = "use_robot_state_publisher" default = "true" />
+    
+    <arg name = "use_new_xacro" default = "true" />
+
+    <group if = "$(arg use_new_xacro)">
+
+        <arg name = "rviz_config_file" default = "$(find roslab3)/config/config.rviz" />
+        <arg name = "filename" default = "robot.xacro" />
+        <arg name = "file" default = "$(find roslab3)/urdf/$(arg filename)" />
+        <param name = "robot_description" command = "$(find xacro)/xacro $(arg file)" />
+        <param if= "$(arg use_gui)" name = "use_sim_time" value = "true" />
+        <node if = "$(arg use_robot_state_publisher)" pkg = "robot_state_publisher" type = "robot_state_publisher" name = "robot_state_publisher" />
+
+        <node pkg = "rviz" type = "rviz" name = "rviz" args = "-d $(arg rviz_config_file)" required = "true"
+            />
+
+        <node if = "$(arg use_gui)" pkg = "joint_state_publisher_gui" type = "joint_state_publisher_gui"
+            name = "joint_state_publisher_gui" />
+        <node unless = "$(arg use_gui)" pkg = "joint_state_publisher" type = "joint_state_publisher"
+            name = "joint_state_publisher" />
+
+    </group>
+        
+    <group unless = "$(arg use_new_xacro)">
+        <include file="$(find navvis_description)/launch/display.launch">
+            <arg name = "use_xacro" default  = "$(arg use_xacro)"/>
+            <arg name = "use_gui" default  = "$(arg use_gui)"/>
+            <arg name = "use_robot_state_publisher" default  = "$(arg use_robot_state_publisher)"/>
+        </include>
+    </group>
+
+</launch>
